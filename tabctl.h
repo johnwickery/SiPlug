@@ -5,37 +5,43 @@
 #include <commctrl.h>
 #include <wingdi.h>
 
-//创建TabCtl
+/* Create tabctl */
 void SiTabCtl_Create(HWND parent);
-//获取页个数
+/* Get tabctl count */
 int SiTabCtl_GetItemCount(void);
-//获取行数
+/* Get tabctl row count */
 int SiTabCtl_GetRowCount(void);
-//获取高度
+/* Get tabctl height */
 int SiTabCtl_GetHeight(void);
-//添加Item
+/* Add tabctl item */
 void SiTabCtl_AddItem(char* title,HWND hwnd);
-//查找item
+/* Find tabctl item */
 int SiTabCtl_FindItem(HWND hwnd);
-//删除Item
+/* Delete tabctl item */
 void SiTabCtl_DelItem(HWND hwnd);
-//设置Item文字
+/* Set tabctl item text */
 void SiTabCtl_SetItemText(HWND hwnd,char* text);
-//选中Item
+/* Set current tabctl item */
 void SiTabCtl_SetCurItem(HWND hwnd);
-//获取当前Item
+/* Get current tabctl item */
 int SiTabCtl_GetCurItem(void);
-//判断是否行数改变
+/* Get current tabctl item corresponding mdi window */
+HWND SiTabCtl_GetMdiHwnd(int item);
+/* Close all mdi window */
+void SiTabCtl_CloseAllMdiHwnd(BOOL closeCurrent);
+/* Judge if row count changed */
 BOOL SiTabCtl_IsRowChanged(void);
-//位置改变
+/* Event tabctl positon change */
 void SiTabCtl_OnPosChanging(WINDOWPOS* pos);
-//选项卡改变
+/* Event tabctl active item change */
 void SiTabCtl_OnSelChange(void);
-//双击选项卡
+/* Event double left click tabctl item */
 void SiTabCtl_OnLButtonDblClk(void);
-//单击选项卡
+/* Event left click tabctl item */
 void SiTabCtl_OnLButtonClk(void);
-//重绘选项卡
+/* Event right click tabctl item */
+void SiTabCtl_OnRButtonClk(LPARAM lParam);
+/* Redraw tabctl item */
 void SiTabCtl_OnDrawItem(DRAWITEMSTRUCT* item);
 
 #endif

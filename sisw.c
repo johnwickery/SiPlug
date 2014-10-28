@@ -26,14 +26,12 @@ static LRESULT CALLBACK SiSwSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 	return lr;
 }
 
-//获取si_Sw窗口过程
 void HookSiSw(HWND hwnd)
 {
 	old_si_sw_proc = (WNDPROC)GetWindowLong(hwnd,GWL_WNDPROC);
 	SetWindowLong(hwnd,GWL_WNDPROC,(DWORD)SiSwSubClass);
 }
 
-//恢复si_Sw窗口过程
 void UnhookSiSw(HWND hwnd)
 {
 	SetWindowLong(hwnd,GWL_WNDPROC,(DWORD)old_si_sw_proc);

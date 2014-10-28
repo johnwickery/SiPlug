@@ -3,10 +3,10 @@
 
 #include <windows.h>
 
-//获取窗口句柄
+/* Get Frame window handle */
 HWND GetSiFrameHwnd(void);
 
-//替换窗口消息
+/* Replace the window message callback */
 void HookSiFrame(void);
 
 #endif

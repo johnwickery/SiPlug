@@ -7,7 +7,6 @@ extern HWND hwnd_mdi_client;
 static WNDPROC old_mdi_client_proc = NULL;
 static WINDOWPOS last_windowpos;
 
-//获取窗口句柄
 HWND GetMdiClientHwnd(HWND parent)
 {
 	HWND find = NULL;
@@ -63,7 +62,6 @@ static LRESULT CALLBACK MdiClientSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			GetSiSwTitle(mdi->szTitle,title);
 			SiTabCtl_AddItem(title,hwnd);
 			SiTabCtl_SetCurItem(hwnd);
-			//resize
 			BOOL resize = SiTabCtl_IsRowChanged();
 			if(resize == TRUE)
 			{
@@ -76,13 +74,12 @@ static LRESULT CALLBACK MdiClientSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			HWND hwnd = (HWND)wParam;
 			SiTabCtl_DelItem(hwnd);
 			UnhookSiSw(hwnd);
-			//find new
+			/* Set a new active mdi window */
 			HWND curhwnd = (HWND)SendMessage(hwnd_mdi_client,WM_MDIGETACTIVE,0,0);
 			if(curhwnd != NULL && IsWindow(curhwnd))
 			{
 				SiTabCtl_SetCurItem(curhwnd);
 			}
-			//resize
 			BOOL resize = SiTabCtl_IsRowChanged();
 			if(resize == TRUE)
 			{
@@ -103,14 +100,11 @@ static LRESULT CALLBACK MdiClientSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	return lr;
 }
 
-//重新调整窗口大小
 void ResizeMdiClient(void)
 {
-	//调用MoveWindow立即重绘窗口
 	MoveWindow(hwnd_mdi_client,last_windowpos.x,last_windowpos.y,last_windowpos.cx,last_windowpos.cy,TRUE);
 }
 
-//替换窗口消息
 void HookMdiClient(void)
 {
 	old_mdi_client_proc = (WNDPROC)GetWindowLong(hwnd_mdi_client,GWL_WNDPROC);

@@ -3,19 +3,26 @@
 
 #include <windows.h>
 
-//输出调试信息
+#define SI_LOG_FILE       "silog.txt"
+
+/* Output debug infomation */
 void WINAPI OutputDebugStringEx(LPCTSTR lpcFormatText, ...);
 
-//获取短标题
+/* Get short title */
 char* GetSiSwTitle(const char* lpc,char* title);
 
-//获取文件类型
-//0 无类型默认
-//1 *.c *.cpp *.cxx *.cs
-//2 *.h *.hpp *.hxx *.inc
-//3 *.txt *.text *.doc
-//4 *.php *.php3 *.htm *.js
-//5 *.pas *.vb *.pb *.vbs
+/* Get file type */
+/* 
+ * 0 - None
+ * 1 - .c    .cpp   .cxx  .cs
+ * 2 - .h    .hpp   .hxx  .inc
+ * 3 - .txt  .text  .doc
+ * 4 - .php  .php3  .htm  .js
+ * 5 - .pas  .vb    .pb   .vbs
+**/
 int GetColorIndex(const char* filename);
+
+/* Easy log */
+void SiLog(const char *fmt, ...);
 
 #endif

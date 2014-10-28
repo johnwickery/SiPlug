@@ -8,7 +8,7 @@ HWND hwnd_tab_ctl = NULL;
 
 void HookSI(void)
 {
-	//hook si_frame
+	/* hook si_frame */
 	hwnd_si_frame = GetSiFrameHwnd();
 	if(hwnd_si_frame == NULL)
 	{
@@ -17,7 +17,7 @@ void HookSI(void)
 	}
     HookSiFrame();
     
-    //hook MDIClient
+    /* hook MDIClient */
     hwnd_mdi_client = GetMdiClientHwnd(hwnd_si_frame);
     if(hwnd_mdi_client == NULL)
     {
@@ -49,5 +49,5 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         case DLL_THREAD_DETACH:
             break;
     }
-    return TRUE; // succesful
+    return TRUE; /* succesful */
 }

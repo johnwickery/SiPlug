@@ -1,9 +1,8 @@
 #include <windows.h>
 
-static HMODULE m_hModule = NULL;	// 原始模块句柄
-static DWORD m_dwReturn[5] = {0};	// 原始函数返回地址
+static HMODULE m_hModule = NULL;	/* Original module handle */
+static DWORD m_dwReturn[5] = {0};	/* Original function address */
 
-// 加载原始模块
 static inline BOOL WINAPI Load()
 {
     TCHAR tzPath[MAX_PATH];
@@ -14,15 +13,14 @@ static inline BOOL WINAPI Load()
     m_hModule = LoadLibrary(tzPath);
     if (m_hModule == NULL)
     {
-        wsprintf(tzTemp, TEXT("无法加载 %s，程序无法正常运行。"), tzPath);
+        wsprintf(tzTemp, TEXT("Can't Load %s"), tzPath);
         OutputDebugString(tzTemp);
         ExitProcess(-2);
     }
-    else OutputDebugString("引导msimg32");
+    else OutputDebugString("Loading msimg32");
     return (m_hModule != NULL);
 }
 
-// 释放原始模块
 static inline VOID WINAPI Free()
 {
     if (m_hModule)
@@ -31,7 +29,6 @@ static inline VOID WINAPI Free()
     }
 }
 
-// 获取原始函数地址
 static FARPROC WINAPI GetAddress(PCSTR pszProcName)
 {
     FARPROC fpAddress;
@@ -47,14 +44,13 @@ static FARPROC WINAPI GetAddress(PCSTR pszProcName)
             pszProcName = szProcName;
         }
 
-        wsprintf(tzTemp, TEXT("无法找到函数 %s，程序无法正常运行。"), pszProcName);
+        wsprintf(tzTemp, TEXT("Can't Find Function %s"), pszProcName);
         OutputDebugString(tzTemp);
         ExitProcess(-2);
     }
 
     return fpAddress;
 }
-
 
 BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, PVOID pvReserved)
 {
@@ -65,9 +61,9 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, PVOID pvReserved)
 
         HMODULE hMyDLL = LoadLibrary("sihook.dll");
         if (hMyDLL == NULL)
-            OutputDebugString("加载sihook.dll失败");
+            OutputDebugString("Load sihook.dll failed");
         else
-            OutputDebugString("加载sihook.dll成功");
+            OutputDebugString("Load sihook.dll success");
         return TRUE;
     }
     else if (dwReason == DLL_PROCESS_DETACH)

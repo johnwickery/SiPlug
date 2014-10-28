@@ -3,13 +3,13 @@
 
 #include <windows.h>
 
-//获取窗口句柄
+/* Get MdiClient handle  */
 HWND GetMdiClientHwnd(HWND parent);
 
-//重新调整窗口大小
+/* Resize MdiClient */
 void ResizeMdiClient(void);
 
-//替换窗口消息
+/* Replace the MdiClient message callback */
 void HookMdiClient(void);
 
 #endif

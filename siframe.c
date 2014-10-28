@@ -23,7 +23,6 @@ static BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lparam)
 	return TRUE;
 }
 
-//获取窗口句柄
 HWND GetSiFrameHwnd(void)
 {
 	DWORD processid = GetCurrentProcessId();
@@ -39,14 +38,6 @@ static LRESULT CALLBACK SiFrameSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 {
 	switch(uMsg)
 	{
-	case WM_SETTEXT:
-		{
-			char buf[SI_BUF_SIZE];
-			strcpy(buf,(char*)lParam);
-			strcat(buf,PLUGIN_TITLE);
-			lParam = (LPARAM)buf;
-		}
-		break;
 	case WM_NOTIFY:
 		{
 			LPNMHDR hdr = (LPNMHDR)lParam;
@@ -62,6 +53,11 @@ static LRESULT CALLBACK SiFrameSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 			else if(hdr->code == NM_CLICK)
 			{
 				SiTabCtl_OnLButtonClk();
+			}
+			else if(hdr->code == NM_RCLICK)
+			{
+				/* TRUE must be returned, or si's owner popupmenu will come out */
+				return TRUE;
 			}
 		}
 		break;
@@ -82,18 +78,10 @@ static LRESULT CALLBACK SiFrameSubClass(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 	return lr;
 }
 
-//替换窗口消息
 void HookSiFrame(void)
 {
-	char text[256];
-	memset(text,0,sizeof(text));
-	GetWindowText(hwnd_si_frame,text,sizeof(text));
-	strcat(text,PLUGIN_TITLE);
-	SetWindowText(hwnd_si_frame,text);
-	
 	old_si_frame_proc = (WNDPROC)GetWindowLong(hwnd_si_frame,GWL_WNDPROC);
 	SetWindowLong(hwnd_si_frame,GWL_WNDPROC,(DWORD)SiFrameSubClass);
 	
-	//create tabctl
 	SiTabCtl_Create(hwnd_si_frame);	
 }

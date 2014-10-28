@@ -2,11 +2,14 @@
 #define __SISW__H__
 
 #include <windows.h>
-//获取短标题
+
+/* Get siSw short title */
 char* GetSiSwTitle(const char* lpc,char* title);
-//获取si_Sw窗口过程
+
+/* Get si_Sw window procedure */
 void HookSiSw(HWND hwnd);
-//恢复si_Sw窗口过程
+
+/* Restore si_Sw window procedure */
 void UnhookSiSw(HWND hwnd);
 
 #endif
