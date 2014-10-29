@@ -1,5 +1,4 @@
-# Project: sihook
-# Makefile created by Dev-C++ 5.5.3
+# Makefie by sharmer
 
 CPP      = g++.exe
 CC       = gcc.exe
@@ -12,7 +11,9 @@ CXXINCS  = -I"C:/App/Dev-Cpp/MinGW32/include" -I"C:/App/Dev-Cpp/MinGW32/lib/gcc/
 BIN      = sihook.dll
 CXXFLAGS = $(CXXINCS) -DBUILDING_DLL=1
 CFLAGS   = $(INCS) -DBUILDING_DLL=1
+LIB      = ../lib/
 RM       = rm -f
+CP       = cp -f
 
 .PHONY: all all-before all-after clean clean-custom
 
@@ -23,6 +24,7 @@ clean: clean-custom
 
 $(BIN): $(LINKOBJ)
 	$(CC) --share $(LINKOBJ) $(LIBS) -o $(BIN)
+	$(CP) $(BIN) $(LIB)
 
 mdiclient.o: mdiclient.c
 	$(CC) -c mdiclient.c -o mdiclient.o $(CFLAGS)

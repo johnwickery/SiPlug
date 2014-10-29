@@ -319,7 +319,8 @@ void SiTabCtl_OnDrawItem(DRAWITEMSTRUCT* item)
 	hBrush = CreateSolidBrush(color_table[type]);
 	if(SiTabCtl_GetCurItem() == item->itemID)
 	{
-		hBrush = CreateSolidBrush(RGB(255,0,0));
+		//hBrush = CreateSolidBrush(RGB(255,255,255));  /* Red */
+		hBrush = CreateSolidBrush(RGB(255,255,0));    /* Yellow */
 	}
     //SetTextColor(lpDrawItem->hDC, RGB(0, 0, 255));
     //FrameRect(item->hDC,&item->rcItem,hBrush);
