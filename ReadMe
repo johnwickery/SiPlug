@@ -1,0 +1,14 @@
+			SiPlug
+=================================
+ABOUT:
+SiPlug is plugin collections for source insight 3.x.
+
+
+BUILD:
+SiPlug is build with MinGW
+Please change the path of LIBS INCS CXXINCS
+Then enter make will get what you want in lib directory.
+
+
+INSTALL:
+copy lib/msimg32.dll lib/sihook.dll to source insight dir. 
