@@ -24,7 +24,7 @@ clean: clean-custom
 
 $(BIN): $(LINKOBJ)
 	$(CC) --share $(LINKOBJ) $(LIBS) -o $(BIN)
-	$(CP) $(BIN) $(LIB)
+	$(CP) $(BIN) $(LIB)$(BIN)
 
 mdiclient.o: mdiclient.c
 	$(CC) -c mdiclient.c -o mdiclient.o $(CFLAGS)

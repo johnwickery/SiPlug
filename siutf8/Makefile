@@ -3,8 +3,8 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = siutf8.o
-LINKOBJ  = siutf8.o
+OBJ      = siutf8.o sichar.o
+LINKOBJ  = siutf8.o sichar.o
 LIBS     = -L"C:/App/Dev-Cpp/MinGW32/lib" -L"C:/App/Dev-Cpp/MinGW32/mingw32/lib" -static-libgcc  -luser32 -lgdi32 -lcomctl32
 INCS     = -I"C:/App/Dev-Cpp/MinGW32/include"
 CXXINCS  = -I"C:/App/Dev-Cpp/MinGW32/include" -I"C:/App/Dev-Cpp/MinGW32/lib/gcc/mingw32/4.7.2/include/c++"
@@ -24,7 +24,10 @@ clean: clean-custom
 
 $(BIN): $(LINKOBJ)
 	$(CC) --share $(LINKOBJ) $(LIBS) -o $(BIN)
-	$(CP) $(BIN) $(LIB)
+	$(CP) $(BIN) $(LIB)$(BIN)
 
-msimg32.o: siutf8.c
+siutf8.o: siutf8.c
 	$(CC) -c siutf8.c -o siutf8.o $(CFLAGS)
+
+sichar.o: sichar.c
+	$(CC) -c sichar.c -o sichar.o $(CFLAGS)

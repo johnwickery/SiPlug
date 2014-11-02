@@ -1,11 +1,12 @@
 /*
- * Check website http://blog.csdn.net/friendan/article/details/12226201
- * Check website http://blog.csdn.net/debugyt/article/details/8048666
+ * http://blog.csdn.net/friendan/article/details/12226201  
+ * http://blog.csdn.net/debugyt/article/details/8048666 ===> this Worked
  *
  * */
 #include <windows.h>  
 #include <stdio.h>
 #include <conio.h>
+#include "sichar.h"
 
 #define FUNC_CREATEFFILE   0
 #define FUNC_CLOSEHANDLE   1
@@ -13,14 +14,14 @@
 #define FUNC_NUMBERS       (FUNC_SETENDOFILE+1)
 
 struct SiHookStruct{
-	BYTE oldEntry[5];
-	BYTE newEntry[5];
+	BYTE oldEntry[8];
+	BYTE newEntry[8];
 	FARPROC oldFunc;
 	FARPROC newFunc;
 	BOOL hooked;
 };
 
-HANDLE moudle;
+HMODULE moudle;
 struct SiHookStruct siHook[FUNC_NUMBERS];
 
 static void HookOn(FARPROC oFunction, BYTE *nEntry, BOOL *hooked);
@@ -33,10 +34,20 @@ HANDLE WINAPI SiCreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess,
 {
 	HANDLE ret;
 	int i = FUNC_CREATEFFILE;
+    DWORD RSize;
+	char *pBuffer = NULL;
+	int fileSize;
+	SI_CHARSET ct;
 
 	HookOff(siHook[i].oldFunc, siHook[i].oldEntry, &(siHook[i].hooked));
-	ret = (*siHook[i].oldFunc)(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
+	
+	ret = (HANDLE)(*siHook[i].oldFunc)(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, 
 										dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+if (GetFileType(ret) == FILE_TYPE_DISK) {
+	/* It's hard to detemain whether we open the file we need to hook */
+	printf("SiCreateFile: %s\n", lpFileName);
+}
 	HookOn(siHook[i].oldFunc,  siHook[i].newEntry, &(siHook[i].hooked));
 	return ret;
 }
@@ -66,8 +77,9 @@ BOOL WINAPI SiSetEndOfFile(HANDLE hFile)
 
 static void HookFunction(BYTE *oEntry, FARPROC oFunction, BYTE *nEntry, FARPROC nFunction)
 {
-	BYTE *nEntryplus;
 
+#if 0
+/* I tryed intel2gas but failed */
 /*
  * intel assembler diff from gas assembler
  * Check http://www.ibm.com/developerworks/cn/linux/l-gas-nasm.html
@@ -95,7 +107,9 @@ static void HookFunction(BYTE *oEntry, FARPROC oFunction, BYTE *nEntry, FARPROC 
 		mov dword ptr [nEntry+1],eax
 	}
 #else
-	/* this is gas assembler style*/
+	BYTE *nEntryplus;
+
+	/* this is gas assembler style, this doesnot work at all*/
 	/* Put real api address into oEntry */
 	__asm__ __volatile__("leal %0, %%edi\n\t"
 		"movl %1, %%esi\n\t"
@@ -116,6 +130,27 @@ static void HookFunction(BYTE *oEntry, FARPROC oFunction, BYTE *nEntry, FARPROC 
 		:"=m"(nEntryplus)
 		:"m"(nFunction), "m"(oFunction));
 #endif
+#endif
+	DWORD dwTemp=0;
+	DWORD dwOldProtect;
+
+	/* Put real api address into oEntry */  
+	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 8, PAGE_READWRITE, &dwOldProtect);
+	ReadProcessMemory(INVALID_HANDLE_VALUE, oFunction, oEntry, 8, NULL);
+	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 8, dwOldProtect, &dwTemp);
+
+/* 
+ * mov eax, 0 = B8 00 00 00 00 
+ * jmp eax    = FF E0
+ */
+	nEntry[0] = 0xB8;
+	nEntry[1] = 0xB8;
+	nEntry[2] = 0xB8;
+	nEntry[3] = 0xB8;
+	nEntry[5] = 0xFF;
+	nEntry[6] = 0xE0;
+	nEntry[7] = 0x00;
+	*(DWORD*)(nEntry+1) = (DWORD)nFunction;  
 }
 
 static void HookOn(FARPROC oFunction, BYTE *nEntry, BOOL *hooked)   
@@ -123,9 +158,9 @@ static void HookOn(FARPROC oFunction, BYTE *nEntry, BOOL *hooked)
 	DWORD dwTemp=0;
 	DWORD dwOldProtect;
       
-	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 5, PAGE_READWRITE, &dwOldProtect);
-	WriteProcessMemory(INVALID_HANDLE_VALUE,oFunction, nEntry, 5, 0);
-	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 5, dwOldProtect, &dwTemp);
+	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 8, PAGE_READWRITE, &dwOldProtect);
+	WriteProcessMemory(INVALID_HANDLE_VALUE,oFunction, nEntry, 8, NULL);
+	VirtualProtectEx(INVALID_HANDLE_VALUE,  oFunction, 8, dwOldProtect, &dwTemp);
 
 	*hooked = TRUE;
 }  
@@ -135,9 +170,9 @@ static void HookOff(FARPROC oFunction, BYTE *oEntry, BOOL *hooked)
 	DWORD dwTemp=0;
 	DWORD dwOldProtect;
 
-	VirtualProtectEx(INVALID_HANDLE_VALUE,   oFunction, 5, PAGE_READWRITE, &dwOldProtect);
-	WriteProcessMemory(INVALID_HANDLE_VALUE, oFunction, oEntry, 5, 0);
-	VirtualProtectEx(INVALID_HANDLE_VALUE,   oFunction, 5, dwOldProtect, &dwTemp);
+	VirtualProtectEx(INVALID_HANDLE_VALUE,   oFunction, 8, PAGE_READWRITE, &dwOldProtect);
+	WriteProcessMemory(INVALID_HANDLE_VALUE, oFunction, oEntry, 8, NULL);
+	VirtualProtectEx(INVALID_HANDLE_VALUE,   oFunction, 8, dwOldProtect, &dwTemp);
 
 	*hooked = FALSE;   
 }
@@ -148,16 +183,17 @@ static void Hook()
 
 	memset(siHook, 0, sizeof(siHook));
 	moudle = GetModuleHandle("kernel32.dll");
+	//moudle = LoadLibrary("kernel32.dll");
 
 	/* Win32 Function values */
-    siHook[FUNC_CREATEFFILE].oldFunc = (FARPROC)GetProcAddress(moudle, "CreateFile");
-    siHook[FUNC_CLOSEHANDLE].oldFunc = (FARPROC)GetProcAddress(moudle, "CloseHandle");
-    siHook[FUNC_SETENDOFILE].oldFunc = (FARPROC)GetProcAddress(moudle, "SetEndOfFile");
+	siHook[FUNC_CREATEFFILE].oldFunc = (FARPROC)GetProcAddress(moudle, "CreateFileA");
+	siHook[FUNC_CLOSEHANDLE].oldFunc = (FARPROC)GetProcAddress(moudle, "CloseHandle");
+	siHook[FUNC_SETENDOFILE].oldFunc = (FARPROC)GetProcAddress(moudle, "SetEndOfFile");
 
 	/* Fake Function values */
-    siHook[FUNC_CREATEFFILE].newFunc = (FARPROC)SiCreateFile;
-    siHook[FUNC_CLOSEHANDLE].newFunc = (FARPROC)SiCloseHandle;
-    siHook[FUNC_SETENDOFILE].newFunc = (FARPROC)SiSetEndOfFile;
+	siHook[FUNC_CREATEFFILE].newFunc = (FARPROC)SiCreateFile;
+	siHook[FUNC_CLOSEHANDLE].newFunc = (FARPROC)SiCloseHandle;
+	siHook[FUNC_SETENDOFILE].newFunc = (FARPROC)SiSetEndOfFile;
 
 	/* Feed siHook */
 	for (i=FUNC_CREATEFFILE; i<FUNC_NUMBERS; i++) {
@@ -175,22 +211,26 @@ static void UnHook()
 		HookOff(siHook[i].oldFunc, siHook[i].oldEntry, &(siHook[i].hooked));
 	}
 	memset(siHook, 0, sizeof(siHook));
+
+	if (moudle) {
+		FreeLibrary(moudle);
+	}
 }  
 
 BOOL WINAPI DllMain(HANDLE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 {
-    switch (dwReason)
-    {
-    case DLL_PROCESS_ATTACH:
+	switch (dwReason)
+	{
+	case DLL_PROCESS_ATTACH:
 		AllocConsole();
 		freopen("CONOUT$","w",stdout);
-        Hook();
-        break;
-    case DLL_PROCESS_DETACH:
-        UnHook();
+		Hook();
+		break;
+	case DLL_PROCESS_DETACH:
+		UnHook();
 		FreeConsole();
-        break;
-    }
-    return TRUE;
+		break;
+	}
+	return TRUE;
 }
 
